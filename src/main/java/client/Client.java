@@ -191,6 +191,35 @@ public class Client {
                         }
                         break;
                     case 2:
+                        System.out.println("Atualizar a senha:");
+                        System.out.print("Digite o email: ");
+                        email = input.next();
+
+                        System.out.print("Digite a senha: ");
+                        password = input.next();
+
+                        result = login(email, password);
+
+                        if(result){
+                            System.out.print("Digite a nova senha: ");
+                            String newPassword = input.next();
+
+                            UpdateRequest attPassowrdRequest = UpdateRequest
+                                    .newBuilder()
+                                    .setKey(email)
+                                    .setValue(String.valueOf(newPassword.hashCode()))
+                                    .build();
+
+                            UpdateResponse attPasswordResponse = loginStub.update(attPassowrdRequest);
+
+                            if(attPasswordResponse.getResponse()){
+                                System.out.println("Senha atualizada com sucesso!");
+                            }else{
+                                System.out.println("Não foi possível atualizar a senha...");
+                            }
+                        }else{
+                            System.out.println("Não foi possível atualizar a senha, pois o email e/ou senha estão incorretos");
+                        }
                         break;
                     default:
                         break;

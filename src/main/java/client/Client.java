@@ -228,6 +228,23 @@ public class Client {
 
                 break;
             case 4:
+                System.out.println("Deletando uma conta:");
+                System.out.print("Digite o e-mail: ");
+                email = input.next();
+
+                DeleteRequest deleteRequest = DeleteRequest
+                        .newBuilder()
+                        .setKey(email)
+                        .build();
+                
+                DeleteResponse deleteResponse = loginStub.delete(deleteRequest);
+
+                if(deleteResponse.getResponse()){
+                    System.out.println("RETORNO: E-mail deletado com sucesso, valor retornado: " + deleteResponse.getMessage());
+                }else{
+                    System.out.println("RETORNO: Não foi possível deletar, pois o e-mail não existe!");
+                }
+
             case 5:
             default:
         }

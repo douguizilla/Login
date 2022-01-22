@@ -1,6 +1,8 @@
 package client;
 
+import br.proto.services.GrpcHashServiceGrpc;
 import br.proto.services.GrpcHashServiceGrpc.*;
+import br.proto.services.ServerServiceGrpc;
 import br.proto.services.ServerServiceGrpc.*;
 import br.proto.services.Services.*;
 import io.grpc.ManagedChannel;
@@ -8,8 +10,6 @@ import io.grpc.ManagedChannelBuilder;
 
 import java.util.Scanner;
 
-import static br.proto.services.ServerServiceGrpc.newBlockingStub;
-import static br.proto.services.GrpcHashServiceGrpc.newBlockingStub;
 
 public class Client {
     public static void main(String[] args) {
@@ -19,7 +19,7 @@ public class Client {
                     .usePlaintext()
                     .build();
 
-            ServerServiceBlockingStub serviceStub = newBlockingStub(servicesChannel);
+            ServerServiceBlockingStub serviceStub = ServerServiceGrpc.newBlockingStub(servicesChannel);
 
             Scanner input = new Scanner(System.in);
             String serviceName;
@@ -47,7 +47,7 @@ public class Client {
                     .usePlaintext()
                     .build();
 
-            GrpcHashServiceBlockingStub loginStub = GrpcHashServiceBlockingStub.newBlockingStub(loginChannel);
+            GrpcHashServiceBlockingStub loginStub = br.proto.services.GrpcHashServiceGrpc.newBlockingStub(loginChannel);
 
         }catch (Exception e){
             e.printStackTrace();

@@ -141,7 +141,7 @@ public class Client {
                 }
                 break;
             case 3:
-                System.out.print("Digite:\n1 - Atualizar o email\nAtualizar a senha\nOpção: ");
+                System.out.print("Digite:\n1 - Atualizar o email\n2 - Atualizar a senha\nOpção: ");
                 while (!input.hasNextInt()) {
                     System.out.println("Digite uma opção válida.\nOpção: ");
                     input.next();
@@ -259,6 +259,7 @@ public class Client {
                 }else{
                     System.out.println("Não foi possível deletar a conta, pois o email e/ou senha estão incorretos");
                 }
+                break;
             default:
                 System.out.println("RETORNO: opção desconhecida.");
                 break;
@@ -273,8 +274,9 @@ public class Client {
 
         ReadResponse loginResponse = loginStub.read(loginRequest);
         String storedPassword = loginResponse.getValue();
+        String passwordHashCode = String.valueOf(password.hashCode());
 
-        if (String.valueOf(password.hashCode()) == storedPassword) {
+        if (passwordHashCode.equals(storedPassword)) {
             return true;
         } else {
             return false;

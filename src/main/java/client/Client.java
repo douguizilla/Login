@@ -65,8 +65,15 @@ public class Client {
 
                 option = input.nextInt();
 
+                if(option == 5){
+                    ExitRequest exitRequest = ExitRequest.newBuilder().setMessage("").build();
+                    loginStub.exit(exitRequest);
+                    loginChannel.shutdown();
+                    break;
+                }
+                optionHandle(option);
             }
-
+            System.out.println("Logout - Client encerrado");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -222,31 +229,39 @@ public class Client {
                         }
                         break;
                     default:
+                        System.out.println("Opção inexistente, tente novamente do inicio...");
                         break;
                 }
-
-
                 break;
             case 4:
-                System.out.println("Deletando uma conta:");
-                System.out.print("Digite o e-mail: ");
+                System.out.println("Deletar conta:");
+                System.out.print("Digite o email: ");
                 email = input.next();
 
-                DeleteRequest deleteRequest = DeleteRequest
-                        .newBuilder()
-                        .setKey(email)
-                        .build();
-                
-                DeleteResponse deleteResponse = loginStub.delete(deleteRequest);
+                System.out.print("Digite a senha: ");
+                password = input.next();
 
-                if(deleteResponse.getResponse()){
-                    System.out.println("RETORNO: E-mail deletado com sucesso, valor retornado: " + deleteResponse.getMessage());
+                result = login(email, password);
+
+                if(result){
+                    DeleteRequest deleteRequest = DeleteRequest
+                            .newBuilder()
+                            .setKey(email)
+                            .build();
+
+                    DeleteResponse deleteResponse = loginStub.delete(deleteRequest);
+
+                    if(deleteResponse.getResponse()){
+                        System.out.println("Conta deletada com sucesso!");
+                    }else{
+                        System.out.println("Não foi possível deletar a conta, pois o e-mail não existe!");
+                    }
                 }else{
-                    System.out.println("RETORNO: Não foi possível deletar, pois o e-mail não existe!");
+                    System.out.println("Não foi possível deletar a conta, pois o email e/ou senha estão incorretos");
                 }
-
-            case 5:
             default:
+                System.out.println("RETORNO: opção desconhecida.");
+                break;
         }
     }
 

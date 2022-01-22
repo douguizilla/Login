@@ -18,9 +18,14 @@ public class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImplBase {
 
         String key = request.getKey();
         String address = hashTableA.read(key);
-        String[] parts = address.split("@");
-        String ip = parts[0];
-        int port = Integer.parseInt(parts[1]);
+        String ip = "";
+        int port = 0;
+
+        if(address != null) {
+            String[] parts = address.split("@");
+            ip = parts[0];
+            port = Integer.parseInt(parts[1]);
+        }
 
         ServiceResponse response = ServiceResponse
                 .newBuilder()

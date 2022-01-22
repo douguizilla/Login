@@ -11,7 +11,8 @@ message ServiceRequest {
 }
 
 message ServiceResponse{
-  string serviceAddress = 1;
+  string serviceIP = 1;
+  int32 servicePort = 2;
 }
 
 service GrpcHashService {

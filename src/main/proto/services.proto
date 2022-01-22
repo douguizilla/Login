@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package br.proto.services;
+
+service ServerService {
+  rpc getService (ServiceRequest) returns (ServiceResponse);
+}
+
+message ServiceRequest {
+  string key = 1;
+}
+
+message ServiceResponse{
+  string serviceIP = 1;
+  int32 servicePort = 2;
+}
+
+service GrpcHashService {
+  rpc create (CreateRequest) returns (CreateResponse);
+  rpc read (ReadRequest) returns(ReadResponse);
+  rpc update(UpdateRequest)returns(UpdateResponse);
+  rpc delete(DeleteRequest)returns(DeleteResponse);
+  rpc exit(ExitRequest)returns(ExitResponse);
+}
+
+message CreateRequest {
+  string key = 1;
+  string value = 2;
+}
+
+message CreateResponse{
+  bool response = 1;
+}
+
+message ReadRequest {
+  string key = 1;
+}
+
+message ReadResponse{
+  string key = 1;
+  string value = 2;
+}
+message UpdateRequest {
+  string key = 1;
+  string value = 2;
+}
+message UpdateResponse{
+  bool response = 1;
+}
+
+message DeleteRequest{
+  string key = 1;
+
+}
+message DeleteResponse{
+  string message = 1;
+  bool response = 2;
+}
+
+message ExitRequest{
+  string message = 1;
+}
+
+message ExitResponse{
+  bool response = 1;
+}

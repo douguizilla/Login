@@ -1,15 +1,20 @@
 package server.login;
 
 import br.proto.services.GrpcHashServiceGrpc;
+import br.proto.services.ServerServiceGrpc;
 import br.proto.services.Services.*;
 import io.grpc.stub.StreamObserver;
 import server.HashTable;
 
 public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImplBase {
     private HashTable hashTableB;
+    private ServerServiceGrpc.ServerServiceBlockingStub serviceStub;
+    private ResponsabilityRange responsabilityRange;
 
-    GrpcHashServiceImpl(HashTable hashTable) {
+    GrpcHashServiceImpl(HashTable hashTable, ServerServiceGrpc.ServerServiceBlockingStub serviceStub, ResponsabilityRange responsabilityRange) {
         this.hashTableB = hashTable;
+        this.serviceStub = serviceStub;
+        this.responsabilityRange = responsabilityRange;
     }
 
     @Override

@@ -1,5 +1,8 @@
 package server.login;
 
+import br.proto.services.ServerServiceGrpc;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import server.HashTable;
@@ -7,18 +10,29 @@ import server.HashTable;
 public class LoginServer {
     static HashTable hashTableB = new HashTable();
     static Server loginServer;
-    static Server nextServer;
     static ResponsabilityRange responsabilityRange;
+    static int currentServerPort;
+    static ServerServiceGrpc.ServerServiceBlockingStub serviceStub;
 
-    public LoginServer(ResponsabilityRange responsabilityRange, Server nextServer){
+
+    public LoginServer(int currentServerPort, String host, int nextServerPort, ResponsabilityRange responsabilityRange){
+        this.currentServerPort = currentServerPort;
+
+        ManagedChannel servicesChannel = ManagedChannelBuilder
+                .forAddress(host, nextServerPort)
+                .usePlaintext()
+                .build();
+
+        this.serviceStub =  ServerServiceGrpc.newBlockingStub(servicesChannel);
+
         this.responsabilityRange = responsabilityRange;
-        this.nextServer = nextServer;
+
     }
 
     public static void main(String[] args) {
         loginServer = ServerBuilder
-                .forPort(12345)
-                .addService(new GrpcHashServiceImpl(hashTableB))
+                .forPort(currentServerPort)
+                .addService(new GrpcHashServiceImpl(hashTableB, serviceStub, responsabilityRange))
                 .build();
 
         try{

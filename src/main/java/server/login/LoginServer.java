@@ -5,6 +5,7 @@ import io.grpc.ServerBuilder;
 import server.HashTable;
 
 public class LoginServer {
+    //before chord
     static HashTable hashTableB = new HashTable();
     static Server loginServer;
     public static void main(String[] args) {

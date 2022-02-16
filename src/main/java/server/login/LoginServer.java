@@ -1,6 +1,6 @@
 package server.login;
 
-import br.proto.services.ServerServiceGrpc;
+import br.proto.services.GrpcHashServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
@@ -12,7 +12,7 @@ public class LoginServer {
     static Server loginServer;
     static ResponsabilityRange responsabilityRange;
     static int currentServerPort;
-    static ServerServiceGrpc.ServerServiceBlockingStub serviceStub;
+    static GrpcHashServiceGrpc.GrpcHashServiceBlockingStub serviceStub;
 
 
     public LoginServer(int currentServerPort, String host, int nextServerPort, ResponsabilityRange responsabilityRange){
@@ -23,7 +23,7 @@ public class LoginServer {
                 .usePlaintext()
                 .build();
 
-        this.serviceStub =  ServerServiceGrpc.newBlockingStub(servicesChannel);
+        this.serviceStub =  br.proto.services.GrpcHashServiceGrpc.newBlockingStub(servicesChannel);
 
         this.responsabilityRange = responsabilityRange;
 

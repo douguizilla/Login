@@ -1,17 +1,16 @@
 package server.login;
 
 import br.proto.services.GrpcHashServiceGrpc;
-import br.proto.services.ServerServiceGrpc;
 import br.proto.services.Services.*;
 import io.grpc.stub.StreamObserver;
 import server.HashTable;
 
 public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImplBase {
     private HashTable hashTableB;
-    private ServerServiceGrpc.ServerServiceBlockingStub nextServerStub;
+    private GrpcHashServiceGrpc.GrpcHashServiceBlockingStub nextServerStub;
     private ResponsabilityRange responsabilityRange;
 
-    GrpcHashServiceImpl(HashTable hashTable, ServerServiceGrpc.ServerServiceBlockingStub serviceStub, ResponsabilityRange responsabilityRange) {
+    GrpcHashServiceImpl(HashTable hashTable, GrpcHashServiceGrpc.GrpcHashServiceBlockingStub serviceStub, ResponsabilityRange responsabilityRange) {
         this.hashTableB = hashTable;
         this.nextServerStub = serviceStub;
         this.responsabilityRange = responsabilityRange;
@@ -23,7 +22,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
         String key = request.getKey();
         String value = request.getValue();
 
-        if (checkResponsable(key)) {
+        if (isResponsable(key)) {
             int result = hashTableB.add(key, value);
 
             CreateResponse response;
@@ -41,6 +40,13 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
             responseObserver.onCompleted();
         } else {
 
+            CreateRequest createRequest = CreateRequest
+                    .newBuilder()
+                    .setKey(key)
+                    .setValue(value)
+                    .build();
+
+            CreateResponse createResponse = nextServerStub.create(createRequest);
 
         }
 
@@ -51,7 +57,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
         String key = request.getKey();
         String value;
 
-        if (checkResponsable(key)) {
+        if (isResponsable(key)) {
             value = hashTableB.read(key);
 
             ReadResponse response;
@@ -78,7 +84,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
         String key = request.getKey();
         String value = request.getValue();
 
-        if (checkResponsable(key)) {
+        if (isResponsable(key)) {
             String oldValue = hashTableB.read(key);
             int result = hashTableB.update(key, value);
             UpdateResponse response;
@@ -105,7 +111,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
         String key = request.getKey();
         String value;
 
-        if (checkResponsable(key)) {
+        if (isResponsable(key)) {
             value = hashTableB.remove(key);
             DeleteResponse response;
             if (value != null) {
@@ -139,7 +145,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
     }
 
 
-    private boolean checkResponsable(String key) {
+    private boolean isResponsable(String key) {
         int hashCode = key.hashCode();
 
         if (hashCode >= responsabilityRange.getMin() && hashCode <= responsabilityRange.getMax())

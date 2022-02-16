@@ -18,42 +18,13 @@ public class Client {
 
     public static void main(String[] args) {
         try {
-            ManagedChannel servicesChannel = ManagedChannelBuilder
-                    .forAddress("localhost", 54321)
-                    .usePlaintext()
-                    .build();
-
-            ServerServiceBlockingStub serviceStub = ServerServiceGrpc.newBlockingStub(servicesChannel);
-
-            input = new Scanner(System.in);
-            String serviceName;
-            ServiceResponse response;
-            do {
-                serviceMenu();
-                serviceName = input.next();
-                ServiceRequest request = ServiceRequest
-                        .newBuilder()
-                        .setKey(serviceName)
-                        .build();
-
-
-                response = serviceStub.getService(request);
-                if (response.getServiceIP().isEmpty()) {
-                    System.out.println("O serviço solicitado não existe, tente novamente...");
-                }
-            } while (response.getServiceIP().isEmpty());
-
-            String ip = response.getServiceIP();
-            int port = response.getServicePort();
 
             ManagedChannel loginChannel = ManagedChannelBuilder
-                    .forAddress(ip, port)
+                    .forAddress("localhost", 12345)
                     .usePlaintext()
                     .build();
 
             loginStub = br.proto.services.GrpcHashServiceGrpc.newBlockingStub(loginChannel);
-
-            System.out.println("Serviço " + serviceName + " encontrado!");
 
             int option;
             while (true) {

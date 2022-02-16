@@ -1,10 +1,7 @@
 package server.login;
 
 import br.proto.services.GrpcHashServiceGrpc;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
+import io.grpc.*;
 import server.HashTable;
 
 public class LoginServer {
@@ -13,23 +10,40 @@ public class LoginServer {
     static ResponsabilityRange responsabilityRange;
     static int currentServerPort;
     static GrpcHashServiceGrpc.GrpcHashServiceBlockingStub serviceStub;
-
+    static String host;
+    static int nextServerPort;
 
     public LoginServer(int currentServerPort, String host, int nextServerPort, ResponsabilityRange responsabilityRange){
         this.currentServerPort = currentServerPort;
-
-        ManagedChannel servicesChannel = ManagedChannelBuilder
-                .forAddress(host, nextServerPort)
-                .usePlaintext()
-                .build();
-
-        this.serviceStub =  br.proto.services.GrpcHashServiceGrpc.newBlockingStub(servicesChannel);
-
+        this.host = host;
+        this.nextServerPort = nextServerPort;
         this.responsabilityRange = responsabilityRange;
 
     }
 
     public static void main(String[] args) {
+
+        ManagedChannel servicesChannel;
+
+        do{
+
+            try{
+                servicesChannel = ManagedChannelBuilder
+                        .forAddress("host", 12345)
+                        .usePlaintext()
+                        .build();
+
+                if (servicesChannel.getState(true) == ConnectivityState.READY)
+                    break;
+
+            }catch (Exception e){
+
+            }
+
+        }while (true);
+
+        serviceStub =  br.proto.services.GrpcHashServiceGrpc.newBlockingStub(servicesChannel);
+
         loginServer = ServerBuilder
                 .forPort(currentServerPort)
                 .addService(new GrpcHashServiceImpl(hashTableB, serviceStub, responsabilityRange))

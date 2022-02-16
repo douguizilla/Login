@@ -8,12 +8,12 @@ import server.HashTable;
 public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImplBase {
     private HashTable hashTableB;
     private GrpcHashServiceGrpc.GrpcHashServiceBlockingStub nextServerStub;
-    private ResponsabilityRange responsabilityRange;
+    private ResponsabilityRange responsability;
 
     GrpcHashServiceImpl(HashTable hashTable, GrpcHashServiceGrpc.GrpcHashServiceBlockingStub serviceStub, ResponsabilityRange responsabilityRange) {
         this.hashTableB = hashTable;
         this.nextServerStub = serviceStub;
-        this.responsabilityRange = responsabilityRange;
+        this.responsability = responsabilityRange;
     }
 
     @Override
@@ -22,60 +22,71 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
         String key = request.getKey();
         String value = request.getValue();
 
+        CreateResponse response;
+
         if (isResponsable(key)) {
             int result = hashTableB.add(key, value);
 
-            CreateResponse response;
             if (result == 1) {
-                System.out.println("CREATE GRPC REQ KEY: " + key + ", VALUE: " + value + ", STATUS: SUCCESS");
+                System.out.println("SERVER " + responsability.getIdServer() + "IS RESPONSABLE TO CREATE THIS ACCOUNT. EMAIL: " + key + "PASSWORD: " + value + " STATUS: SUCCESS");
                 response = CreateResponse.newBuilder().setResponse(true).build();
             } else {
-                System.out.println("CREATE GRPC REQ KEY: " + key + ", VALUE: " + value + ", STATUS: FAILURE");
+                System.out.println("SERVER " + responsability.getIdServer() + "IS RESPONSABLE TO CREATE THIS ACCOUNT. EMAIL: " + key + "PASSWORD: " + value + " STATUS: FAILED");
                 response = CreateResponse.newBuilder().setResponse(false).build();
             }
 
-            hashTableB.showAll();
-
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
         } else {
-
+            System.out.println("SERVER " + responsability.getIdServer() + "IS NOT RESPONSABLE TO CREATE THIS ACCOUNT. EMAIL: " + key + "PASSWORD: " + value + " SENT TO NEXT SERVER");
             CreateRequest createRequest = CreateRequest
                     .newBuilder()
                     .setKey(key)
                     .setValue(value)
                     .build();
 
-            CreateResponse createResponse = nextServerStub.create(createRequest);
+            CreateResponse nextResponse = nextServerStub.create(createRequest);
 
+            response = CreateResponse.newBuilder().setResponse(nextResponse.getResponse()).build();
         }
+
+        hashTableB.showAll();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
 
     }
 
     @Override
     public void read(ReadRequest request, StreamObserver<ReadResponse> responseObserver) {
         String key = request.getKey();
-        String value;
+        ReadResponse response;
 
         if (isResponsable(key)) {
-            value = hashTableB.read(key);
+            String value = hashTableB.read(key);
 
-            ReadResponse response;
             if (value != null) {
-                System.out.println("READ GRPC REQ KEY: " + key + ", VALUE: " + value + ", STATUS: SUCCESS");
+                System.out.println("SERVER " + responsability.getIdServer() + "IS RESPONSABLE TO READ THIS ACCOUNT VALUE. EMAIL: " + key + "PASSWORD: " + value + " STATUS: SUCCESS");
                 response = ReadResponse.newBuilder().setKey(key).setValue(value).build();
             } else {
-                System.out.println("READ GRPC REQ KEY: " + key + ", VALUE: null, STATUS: FAILURE");
+                System.out.println("SERVER " + responsability.getIdServer() + "IS RESPONSABLE TO READ THIS ACCOUNT VALUE. EMAIL: " + key + " STATUS: FAILED");
                 response = ReadResponse.newBuilder().setKey(key).setValue("").build();
             }
 
-            hashTableB.showAll();
-
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
         } else {
 
+            System.out.println("SERVER " + responsability.getIdServer() + "IS NOT RESPONSABLE TO READ THIS ACCOUNT. EMAIL: " + key + "PASSWORD: " + " SENT TO NEXT SERVER");
+            ReadRequest readRequest = ReadRequest
+                    .newBuilder()
+                    .setKey(key)
+                    .build();
+
+            response = nextServerStub.read(readRequest);
+
         }
+
+        hashTableB.showAll();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
 
     }
 
@@ -83,26 +94,36 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
     public void update(UpdateRequest request, StreamObserver<UpdateResponse> responseObserver) {
         String key = request.getKey();
         String value = request.getValue();
+        UpdateResponse response;
 
         if (isResponsable(key)) {
             String oldValue = hashTableB.read(key);
             int result = hashTableB.update(key, value);
-            UpdateResponse response;
+
             if (result == 1) {
-                System.out.println("UPDATE GRPC REQ KEY: " + key + ", CHANGE OLD_VALUE: " + oldValue + ", TO NEW_VALUE: " + value + ", STATUS: SUCCESS");
+                System.out.println("SERVER " + responsability.getIdServer() + "IS RESPONSABLE TO UPDATE THIS ACCOUNT VALUE. EMAIL: " + key + "PASSWORD: " + value + " STATUS: SUCCESS");
                 response = UpdateResponse.newBuilder().setResponse(true).build();
             } else {
-                System.out.println("UPDATE GRPC REQ KEY: " + key + ", VALUE: null, STATUS: FAILURE");
+                System.out.println("SERVER " + responsability.getIdServer() + "IS RESPONSABLE TO UPDATE THIS ACCOUNT VALUE. EMAIL: " + key + "PASSWORD: " + value + " STATUS: FAILED");
                 response = UpdateResponse.newBuilder().setResponse(false).build();
             }
 
-            hashTableB.showAll();
-
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
         } else {
+            System.out.println("SERVER " + responsability.getIdServer() + "IS NOT RESPONSABLE TO UPDATE THIS ACCOUNT. EMAIL: " + key + "PASSWORD: " + value + " SENT TO NEXT SERVER");
 
+            UpdateRequest updateRequest = UpdateRequest
+                    .newBuilder()
+                    .setKey(key)
+                    .setValue(value)
+                    .build();
+
+            response = nextServerStub.update(updateRequest);
         }
+
+        hashTableB.showAll();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
 
     }
 
@@ -110,26 +131,34 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
     public void delete(DeleteRequest request, StreamObserver<DeleteResponse> responseObserver) {
         String key = request.getKey();
         String value;
+        DeleteResponse response;
 
         if (isResponsable(key)) {
             value = hashTableB.remove(key);
-            DeleteResponse response;
+
             if (value != null) {
-                System.out.println("DELETE GRPC REQ KEY: " + key + ", RETURN_VALUE: " + value + ", STATUS: SUCCESS");
+                System.out.println("SERVER " + responsability.getIdServer() + "IS RESPONSABLE TO DELETE THIS ACCOUNT VALUE. EMAIL: " + key + "PASSWORD: " + value + " STATUS: SUCCESS");
                 response = DeleteResponse.newBuilder().setResponse(true).setMessage(value).build();
             } else {
-                System.out.println("DELETE GRPC REQ KEY: " + key + ", VALUE: null, STATUS: FAILURE");
+                System.out.println("SERVER " + responsability.getIdServer() + "IS RESPONSABLE TO DELETE THIS ACCOUNT VALUE. EMAIL: " + key + "PASSWORD: " + value + " STATUS: FAILED");
                 response = DeleteResponse.newBuilder().setResponse(false).setMessage("").build();
             }
 
-            hashTableB.showAll();
-
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
         } else {
+            System.out.println("SERVER " + responsability.getIdServer() + "IS NOT RESPONSABLE TO DELETE THIS ACCOUNT. EMAIL: " + key + "PASSWORD: " + " SENT TO NEXT SERVER");
+            DeleteRequest deleteRequest = DeleteRequest
+                    .newBuilder()
+                    .setKey(key)
+                    .build();
 
+            response = nextServerStub.delete(deleteRequest);
 
         }
+
+        hashTableB.showAll();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
 
     }
 
@@ -148,7 +177,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
     private boolean isResponsable(String key) {
         int hashCode = key.hashCode();
 
-        if (hashCode >= responsabilityRange.getMin() && hashCode <= responsabilityRange.getMax())
+        if (hashCode >= responsability.getMin() && hashCode <= responsability.getMax())
             return true;
         else
             return false;

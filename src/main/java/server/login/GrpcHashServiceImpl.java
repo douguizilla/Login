@@ -20,22 +20,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
         String ip = parts[0];
         int port = Integer.parseInt(parts[1]);
 
-        ManagedChannel channel;
-
-        do{
-            try {
-                channel = ManagedChannelBuilder
-                        .forAddress(ip, port)
-                        .usePlaintext()
-                        .build();
-
-                if(channel.getState(true) == ConnectivityState.READY){
-                    break;
-                }
-            }catch (Exception e){ }
-
-        }while(true);
-
+        ManagedChannel channel = ManagedChannelBuilder.forAddress(ip,port).usePlaintext().build();
         this.nextServerStub = br.proto.services.GrpcHashServiceGrpc.newBlockingStub(channel);
         this.responsability = responsabilityRange;
     }
@@ -97,7 +82,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
 
         } else {
 
-            System.out.println("SERVER " + responsability.getIdServer() + "IS NOT RESPONSABLE TO READ THIS ACCOUNT. EMAIL: " + key + "PASSWORD: " + " SENT TO NEXT SERVER");
+            System.out.println("SERVER " + responsability.getIdServer() + " IS NOT RESPONSABLE TO READ THIS ACCOUNT. EMAIL: " + key + "PASSWORD: " + " SENT TO NEXT SERVER");
             ReadRequest readRequest = ReadRequest
                     .newBuilder()
                     .setKey(key)

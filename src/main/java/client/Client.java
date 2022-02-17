@@ -26,9 +26,12 @@ public class Client {
 
             loginStub = br.proto.services.GrpcHashServiceGrpc.newBlockingStub(loginChannel);
 
+            input = new Scanner(System.in);
+
             int option;
             while (true) {
                 loginMenu();
+
                 while (!input.hasNextInt()) {
                     System.out.println("Digite uma opção válida.\nOpção: ");
                     input.next();

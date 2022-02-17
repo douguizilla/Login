@@ -15,15 +15,14 @@ public class LoginServer {
         this.currentServerPort = currentServerPort;
         this.nextServerAddress = nextServerAddress;
         this.responsabilityRange = responsabilityRange;
-    }
 
-    public static void main(String[] args) {
-
-        loginServer = ServerBuilder
+        this.loginServer = ServerBuilder
                 .forPort(currentServerPort)
                 .addService(new GrpcHashServiceImpl(hashTableB, nextServerAddress, responsabilityRange))
                 .build();
+    }
 
+    public void start(){
         try{
             loginServer.start();
             loginServer.awaitTermination();

@@ -15,18 +15,24 @@ import java.util.Scanner;
 public class Client {
     static GrpcHashServiceBlockingStub loginStub;
     static Scanner input;
+    static String ip;
+    static int port;
 
     public static void main(String[] args) {
         try {
+            input = new Scanner(System.in);
+
+            System.out.println("Digite o ip:");
+            ip = input.next();
+            System.out.println("Digite a porta: ");
+            port = Integer.parseInt(input.next());
 
             ManagedChannel loginChannel = ManagedChannelBuilder
-                    .forAddress("localhost", 12345)
+                    .forAddress(ip, port)
                     .usePlaintext()
                     .build();
 
             loginStub = br.proto.services.GrpcHashServiceGrpc.newBlockingStub(loginChannel);
-
-            input = new Scanner(System.in);
 
             int option;
             while (true) {

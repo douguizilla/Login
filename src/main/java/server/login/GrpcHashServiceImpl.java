@@ -50,7 +50,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
             }
 
         } else {
-            System.out.println("SERVER " + responsability.getIdServer() + " IS NOT RESPONSABLE TO CREATE THIS ACCOUNT. EMAIL: " + key + " PASSWORD: " + value + " SENT TO NEXT SERVER");
+            System.out.println("SERVER " + responsability.getIdServer() + " IS NOT RESPONSABLE TO CREATE THIS ACCOUNT WITH EMAIL: " + key + " SENT TO NEXT SERVER");
             CreateRequest createRequest = CreateRequest
                     .newBuilder()
                     .setKey(key)
@@ -89,7 +89,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
 
         } else {
 
-            System.out.println("SERVER " + responsability.getIdServer() + " IS NOT RESPONSABLE TO READ THIS ACCOUNT. EMAIL: " + key + " PASSWORD: " + " SENT TO NEXT SERVER");
+            System.out.println("SERVER " + responsability.getIdServer() + " IS NOT RESPONSABLE TO READ THIS ACCOUNT WITH EMAIL: " + key + " SENT TO NEXT SERVER");
             ReadRequest readRequest = ReadRequest
                     .newBuilder()
                     .setKey(key)
@@ -127,7 +127,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
             }
 
         } else {
-            System.out.println("SERVER " + responsability.getIdServer() + " IS NOT RESPONSABLE TO UPDATE THIS ACCOUNT. EMAIL: " + key + " PASSWORD: " + value + " SENT TO NEXT SERVER");
+            System.out.println("SERVER " + responsability.getIdServer() + " IS NOT RESPONSABLE TO UPDATE THIS ACCOUNT WITH EMAIL: " + key + " SENT TO NEXT SERVER");
 
             UpdateRequest updateRequest = UpdateRequest
                     .newBuilder()
@@ -165,7 +165,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
             }
 
         } else {
-            System.out.println("SERVER " + responsability.getIdServer() + " IS NOT RESPONSABLE TO DELETE THIS ACCOUNT. EMAIL: " + key + " PASSWORD: " + " SENT TO NEXT SERVER");
+            System.out.println("SERVER " + responsability.getIdServer() + " IS NOT RESPONSABLE TO DELETE THIS ACCOUNT WITH EMAIL: " + key + " SENT TO NEXT SERVER");
             DeleteRequest deleteRequest = DeleteRequest
                     .newBuilder()
                     .setKey(key)

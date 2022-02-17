@@ -5,7 +5,8 @@ import io.grpc.*;
 import server.HashTable;
 
 public class LoginServer {
-    HashTable hashTableB = new HashTable();
+    static int id = 1;
+    HashTable hashTableB = new HashTable(id++);
     Server loginServer;
     ResponsabilityRange responsabilityRange;
     int currentServerPort;

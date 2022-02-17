@@ -47,7 +47,7 @@ public class HashTable {
 
         synchronized public void showAll(){
             System.out.println("=================");
-            System.out.println("Tabela atualizada:");
+            System.out.println("Tabela " + this.id + " atualizada:");
             for (String _key: hashTable.keySet()) {
                 String key = _key;
                 String value = hashTable.get(key);

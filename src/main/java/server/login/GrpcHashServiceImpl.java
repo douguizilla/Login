@@ -2,6 +2,9 @@ package server.login;
 
 import br.proto.services.GrpcHashServiceGrpc;
 import br.proto.services.Services.*;
+import io.grpc.ConnectivityState;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import server.HashTable;
 
@@ -10,9 +13,30 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
     private GrpcHashServiceGrpc.GrpcHashServiceBlockingStub nextServerStub;
     private ResponsabilityRange responsability;
 
-    GrpcHashServiceImpl(HashTable hashTable, GrpcHashServiceGrpc.GrpcHashServiceBlockingStub serviceStub, ResponsabilityRange responsabilityRange) {
+    GrpcHashServiceImpl(HashTable hashTable, String nextServerAddress, ResponsabilityRange responsabilityRange) {
         this.hashTableB = hashTable;
-        this.nextServerStub = serviceStub;
+
+        String[] parts = nextServerAddress.split("@");
+        String ip = parts[0];
+        int port = Integer.parseInt(parts[1]);
+
+        ManagedChannel channel;
+
+        do{
+            try {
+                channel = ManagedChannelBuilder
+                        .forAddress(ip, port)
+                        .usePlaintext()
+                        .build();
+
+                if(channel.getState(true) == ConnectivityState.READY){
+                    break;
+                }
+            }catch (Exception e){ }
+
+        }while(true);
+
+        this.nextServerStub = br.proto.services.GrpcHashServiceGrpc.newBlockingStub(channel);
         this.responsability = responsabilityRange;
     }
 

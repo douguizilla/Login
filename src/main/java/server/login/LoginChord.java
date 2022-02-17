@@ -8,9 +8,17 @@ public class LoginChord {
     static int min3 = max2 + 1;
     static int max3 = Integer.MAX_VALUE;
     public static void main(String[] args) {
-        new LoginServer(12345,"localhost@12346",new ResponsabilityRange(1,min1, max1)).start();
-        new LoginServer(12346,"localhost@12347",new ResponsabilityRange(1,min2, max2)).start();
-        new LoginServer(12347,"localhost@12345",new ResponsabilityRange(1,min3, max3)).start();
+       LoginServer l1 = new LoginServer(12345,"localhost@12346",new ResponsabilityRange(1,min1, max1));
+       LoginServer l2 = new LoginServer(12346,"localhost@12347",new ResponsabilityRange(2,min2, max2));
+       LoginServer l3 = new LoginServer(12347,"localhost@12345",new ResponsabilityRange(3,min3, max3));
+
+       l1.start();
+       l2.start();
+       l3.start();
+
+        l1.awaitTermination();
+        l2.awaitTermination();
+        l3.awaitTermination();
 
     }
 

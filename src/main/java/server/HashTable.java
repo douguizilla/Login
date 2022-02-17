@@ -5,6 +5,15 @@ import java.util.Map;
 
 public class HashTable {
         private Map<String,String> hashTable = new HashMap<>();
+        private int id = 0;
+
+        public HashTable(int id){
+            this.id = id;
+        }
+
+        public HashTable(){
+
+        }
 
         synchronized public int add(String key, String value){
             if (!hashTable.containsKey(key)) {

@@ -21,20 +21,21 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
     }
 
     public void connectToNextServer() {
-        String[] parts = this.nextServerAddress.split("@");
-        String ip = parts[0];
-        int port = Integer.parseInt(parts[1]);
+        if(!isConnected) {
+            String[] parts = this.nextServerAddress.split("@");
+            String ip = parts[0];
+            int port = Integer.parseInt(parts[1]);
 
-        ManagedChannelBuilder channelBuilder = ManagedChannelBuilder.forAddress(ip, port).usePlaintext().enableRetry();
-        ManagedChannel channel = channelBuilder.build();
-        this.nextServerStub = br.proto.services.GrpcHashServiceGrpc.newBlockingStub(channel);
-        isConnected = true;
+            ManagedChannelBuilder channelBuilder = ManagedChannelBuilder.forAddress(ip, port).usePlaintext().enableRetry();
+            ManagedChannel channel = channelBuilder.build();
+            this.nextServerStub = br.proto.services.GrpcHashServiceGrpc.newBlockingStub(channel);
+            isConnected = true;
+        }
     }
 
     @Override
     public void create(CreateRequest request, StreamObserver<CreateResponse> responseObserver) {
-        if(!isConnected)
-            connectToNextServer();
+        connectToNextServer();
 
         String key = request.getKey();
         String value = request.getValue();
@@ -74,8 +75,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
 
     @Override
     public void read(ReadRequest request, StreamObserver<ReadResponse> responseObserver) {
-        if(!isConnected)
-            connectToNextServer();
+        connectToNextServer();
 
         String key = request.getKey();
         ReadResponse response;
@@ -112,8 +112,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
 
     @Override
     public void update(UpdateRequest request, StreamObserver<UpdateResponse> responseObserver) {
-        if(!isConnected)
-            connectToNextServer();
+        connectToNextServer();
 
         String key = request.getKey();
         String value = request.getValue();
@@ -152,8 +151,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
 
     @Override
     public void delete(DeleteRequest request, StreamObserver<DeleteResponse> responseObserver) {
-        if(!isConnected)
-            connectToNextServer();
+        connectToNextServer();
 
         String key = request.getKey();
         String value;
@@ -190,8 +188,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
 
     @Override
     public void exit(ExitRequest request, StreamObserver<ExitResponse> responseObserver) {
-        if(!isConnected)
-            connectToNextServer();
+        connectToNextServer();
 
         ExitResponse response;
         response = ExitResponse.newBuilder().setResponse(true).build();

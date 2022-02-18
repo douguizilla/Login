@@ -1,11 +1,7 @@
 package client;
 
 import br.proto.services.GrpcHashServiceGrpc.GrpcHashServiceBlockingStub;
-import br.proto.services.ServerServiceGrpc;
-import br.proto.services.ServerServiceGrpc.ServerServiceBlockingStub;
 import br.proto.services.Services.*;
-import br.proto.services.Services.ServiceRequest;
-import br.proto.services.Services.ServiceResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 

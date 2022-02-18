@@ -1,25 +1,24 @@
 package server.login;
 
-import br.proto.services.GrpcHashServiceGrpc;
 import io.grpc.*;
 import server.HashTable;
 
 public class LoginServer {
-    static int id = 1;
-    HashTable hashTableB = new HashTable(id++);
+    HashTable hashTable;
     Server loginServer;
     ResponsabilityRange responsabilityRange;
     int currentServerPort;
     String nextServerAddress; //"localhost@12345"
 
     public LoginServer(int currentServerPort, String nextServerAddress, ResponsabilityRange responsabilityRange){
+        this.hashTable = new HashTable(responsabilityRange.getIdServer());
         this.currentServerPort = currentServerPort;
         this.nextServerAddress = nextServerAddress;
         this.responsabilityRange = responsabilityRange;
 
         this.loginServer = ServerBuilder
                 .forPort(currentServerPort)
-                .addService(new GrpcHashServiceImpl(hashTableB, nextServerAddress, responsabilityRange))
+                .addService(new GrpcHashServiceImpl(hashTable, nextServerAddress, responsabilityRange))
                 .build();
     }
 

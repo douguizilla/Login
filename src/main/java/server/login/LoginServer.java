@@ -9,12 +9,17 @@ public class LoginServer {
     ResponsabilityRange responsabilityRange;
     int currentServerPort;
     String nextServerAddress; //"localhost@12345"
+    Object[][] ft;
+    int id;
 
     public LoginServer(int currentServerPort, String nextServerAddress, ResponsabilityRange responsabilityRange){
         this.hashTable = new HashTable(responsabilityRange.getIdServer());
         this.currentServerPort = currentServerPort;
         this.nextServerAddress = nextServerAddress;
         this.responsabilityRange = responsabilityRange;
+        this.ft = ft;
+        this.id = id;
+
 
         this.loginServer = ServerBuilder
                 .forPort(currentServerPort)

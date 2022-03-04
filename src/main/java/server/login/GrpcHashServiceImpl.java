@@ -12,12 +12,13 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
     private String nextServerAddress;
     private GrpcHashServiceGrpc.GrpcHashServiceBlockingStub nextServerStub;
     private ResponsabilityRange responsability;
+    private int id;
     private boolean isConnected = false;
 
-    GrpcHashServiceImpl(HashTable hashTable, String nextServerAddress, ResponsabilityRange responsabilityRange) {
+    GrpcHashServiceImpl(HashTable hashTable, String nextServerAddress, int id) {
         this.hashTableB = hashTable;
         this.nextServerAddress = nextServerAddress;
-        this.responsability = responsabilityRange;
+        this.id = id;
     }
 
     public void connectToNextServer() {

@@ -25,14 +25,14 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
 
     GrpcHashServiceImpl(HashTable hashTable, int id, List<LoginServer> serverList) {
         this.hashTableB = hashTable;
-       // this.nextServerAddress = nextServerAddress;
+        // this.nextServerAddress = nextServerAddress;
         this.id = id;
-       // this.ft = ft;
+        // this.ft = ft;
         this.serverList = serverList;
     }
 
     public void connectToNextServer() {
-        if(!isConnected) {
+        if (!isConnected) {
             String[] parts = this.nextServerAddress.split("@");
             String ip = parts[0];
             int port = Integer.parseInt(parts[1]);
@@ -46,7 +46,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
 
     @Override
     public void create(CreateRequest request, StreamObserver<CreateResponse> responseObserver) {
-       // connectToNextServer();
+        // connectToNextServer();
 
         String key = request.getKey();
         String value = request.getValue();
@@ -213,30 +213,42 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
 
     private boolean isResponsable(String key) {
         int hashCode = Math.abs(key.hashCode()) % 128;
-        TreeMap<Integer, String> temp = new TreeMap<>();
 
+        if (hashCode > id) {
+            TreeMap<Integer, String> temp = new TreeMap<>();
 
-        System.out.println(Arrays.stream(LoginServer.ft).count());
-        int teste = (int) Arrays.stream(LoginServer.ft).flatMap(Arrays::stream)
-                .collect(Collectors.toList()).stream()
-                .filter(e -> (int)e > hashCode).findFirst().orElse(0);
+            for (int x = 0; x < LoginServer.ft.length; x++) {
+                temp.put((Integer) LoginServer.ft[x][0], String.valueOf(LoginServer.ft[x][1]));
+            }
 
-        int index = Arrays.stream(LoginServer.ft).flatMap(Arrays::stream)
-                .collect(Collectors.toList()).indexOf(teste);
+            int teste = temp.ceilingKey(hashCode);
 
-        int i;
-        String servidor = (String) LoginServer.ft[index][1];
-//        for (int x = 0; x < LoginServer.ft.length; x++) {
+            if (temp.ceilingKey(hashCode) != null) {
+                teste = temp.ceilingKey(hashCode);
+            } else {
+                teste = temp.firstKey();
+            }
+
+            String teste1 = temp.ceilingEntry(teste).getValue();
+
+//        System.out.println(Arrays.stream(LoginServer.ft).count());
+//        int teste = (int) Arrays.stream(LoginServer.ft).flatMap(Arrays::stream)
+//                .collect(Collectors.toList()).stream()
+//                .filter(e -> (int)e > hashCode).findFirst().orElse(0);
 //
-//            if
-//        //    if(hashCode )
-//        }
+//        int index = Arrays.stream(LoginServer.ft).flatMap(Arrays::stream)
+//                .collect(Collectors.toList()).indexOf(teste);
+//
+//        int i;
+            // String servidor = (String) LoginServer.ft[index][1];
+            nextServerAddress = teste1;
 
+            return false;
+        } else {
+            return true;
+        }
 
-
-        return false;
-
-     //   AQUI VAI ACONTECER A MAGICA
+        //   AQUI VAI ACONTECER A MAGICA
 //        System.out.println("MIN: " + responsability.getMin() + " MAX: " + responsability.getMax());
 //        System.out.println("HASHCODE: " + hashCode);
 //

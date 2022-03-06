@@ -7,6 +7,8 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import server.HashTable;
 
+import java.util.List;
+
 public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImplBase {
     private HashTable hashTableB;
     private String nextServerAddress;
@@ -14,11 +16,15 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
     private ResponsabilityRange responsability;
     private int id;
     private boolean isConnected = false;
+    private Object[][] ft;
+    private List<LoginServer> serverList;
 
-    GrpcHashServiceImpl(HashTable hashTable, String nextServerAddress, int id) {
+    GrpcHashServiceImpl(HashTable hashTable, int id, Object[][] ft, List<LoginServer> serverList) {
         this.hashTableB = hashTable;
-        this.nextServerAddress = nextServerAddress;
+       // this.nextServerAddress = nextServerAddress;
         this.id = id;
+        this.ft = ft;
+        this.serverList = serverList;
     }
 
     public void connectToNextServer() {
@@ -36,7 +42,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
 
     @Override
     public void create(CreateRequest request, StreamObserver<CreateResponse> responseObserver) {
-        connectToNextServer();
+       // connectToNextServer();
 
         String key = request.getKey();
         String value = request.getValue();
@@ -202,16 +208,22 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
 
 
     private boolean isResponsable(String key) {
-        int hashCode = Math.abs(key.hashCode());
+        int hashCode = Math.abs(key.hashCode()) % 128;
 
-        System.out.println("MIN: " + responsability.getMin() + " MAX: " + responsability.getMax());
-        System.out.println("HASHCODE: " + hashCode);
 
-        if (hashCode >= responsability.getMin() && hashCode <= responsability.getMax()) {
-            return true;
-        }else {
-            return false;
-        }
+
+
+        return false;
+
+     //   AQUI VAI ACONTECER A MAGICA
+//        System.out.println("MIN: " + responsability.getMin() + " MAX: " + responsability.getMax());
+//        System.out.println("HASHCODE: " + hashCode);
+//
+//        if (hashCode >= responsability.getMin() && hashCode <= responsability.getMax()) {
+//            return true;
+//        }else {
+//            return false;
+//        }
 
     }
 

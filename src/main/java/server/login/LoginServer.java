@@ -13,7 +13,7 @@ public class LoginServer {
     int currentServerPort;
     String nextServerAddress; //"localhost@12345"
     //Map<Integer,String> ft;
-    Object[][] ft;
+    static Object[][] ft;
     int id;
 
     public LoginServer(int currentServerPort, String nextServerAddress, int id, List<LoginServer> serverList){
@@ -28,7 +28,7 @@ public class LoginServer {
 
         this.loginServer = ServerBuilder
                 .forPort(currentServerPort)
-                .addService(new GrpcHashServiceImpl(hashTable, id, ft, serverList))
+                .addService(new GrpcHashServiceImpl(hashTable, id, serverList))
                 .build();
     }
 
@@ -81,7 +81,7 @@ public class LoginServer {
         //String[] array = new String[allServers.size()];
         int index = 0;
         for (LoginServer value : allServers) {
-            temp.put(value.id,"localhost" + value.currentServerPort);
+            temp.put(value.id,"localhost@" + value.currentServerPort);
             index++;
         }
 //

@@ -7,7 +7,11 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import server.HashTable;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImplBase {
     private HashTable hashTableB;
@@ -16,14 +20,14 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
     private ResponsabilityRange responsability;
     private int id;
     private boolean isConnected = false;
-    private Object[][] ft;
+    //private Object[][] ft;
     private List<LoginServer> serverList;
 
-    GrpcHashServiceImpl(HashTable hashTable, int id, Object[][] ft, List<LoginServer> serverList) {
+    GrpcHashServiceImpl(HashTable hashTable, int id, List<LoginServer> serverList) {
         this.hashTableB = hashTable;
        // this.nextServerAddress = nextServerAddress;
         this.id = id;
-        this.ft = ft;
+       // this.ft = ft;
         this.serverList = serverList;
     }
 
@@ -208,8 +212,25 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
 
 
     private boolean isResponsable(String key) {
-        int hashCode = Math.abs(key.hashCode()) % 128;
+        int hashCode = 128;//Math.abs(key.hashCode()) % 128;
+        TreeMap<Integer, String> temp = new TreeMap<>();
 
+
+        System.out.println(Arrays.stream(LoginServer.ft).count());
+        int teste = (int) Arrays.stream(LoginServer.ft).flatMap(Arrays::stream)
+                .collect(Collectors.toList()).stream()
+                .filter(e -> (int)e > hashCode).findFirst().orElse(0);
+
+        int index = Arrays.stream(LoginServer.ft).flatMap(Arrays::stream)
+                .collect(Collectors.toList()).indexOf(teste);
+
+        int i;
+        String servidor = (String) LoginServer.ft[index][1];
+//        for (int x = 0; x < LoginServer.ft.length; x++) {
+//
+//            if
+//        //    if(hashCode )
+//        }
 
 
 

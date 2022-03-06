@@ -212,7 +212,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
 
 
     private boolean isResponsable(String key) {
-        int hashCode = 128;//Math.abs(key.hashCode()) % 128;
+        int hashCode = Math.abs(key.hashCode()) % 128;
         TreeMap<Integer, String> temp = new TreeMap<>();
 
 

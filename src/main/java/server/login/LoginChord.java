@@ -2,7 +2,6 @@ package server.login;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
 
 public class LoginChord {
     static int min1 = 0;
@@ -14,13 +13,13 @@ public class LoginChord {
     static List<LoginServer> serverList = new ArrayList<>();
 
     public static void main(String[] args) {
-        serverList.add(new LoginServer(12345,"localhost@12346", max1));
-        serverList.add(new LoginServer(12346,"localhost@12347",max2));
-        serverList.add(new LoginServer(12347,"localhost@12345",max3));
+        serverList.add(new LoginServer(12345,max1));
+        serverList.add(new LoginServer(12346,max2));
+        serverList.add(new LoginServer(12347,max3));
 
-       LoginServer l1 = new LoginServer(12345,"localhost@12346", max1, serverList);
-       LoginServer l2 = new LoginServer(12346,"localhost@12347",max2,serverList);
-       LoginServer l3 = new LoginServer(12347,"localhost@12345",max3,serverList);
+       LoginServer l1 = new LoginServer(12345, max1, serverList);
+       LoginServer l2 = new LoginServer(12346,max2,serverList);
+       LoginServer l3 = new LoginServer(12347,max3,serverList);
 //        List<LoginServer> serverList = new ArrayList<LoginServer>();
 //        serverList.add(l1);
 //        serverList.add(l2);

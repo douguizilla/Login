@@ -7,11 +7,7 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import server.HashTable;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImplBase {
     private HashTable hashTableB;
@@ -57,15 +53,16 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
             int result = hashTableB.add(key, value);
 
             if (result == 1) {
-                System.out.println("SERVER " + responsability.getIdServer() + " IS RESPONSABLE TO CREATE THIS ACCOUNT. EMAIL: " + key + " PASSWORD: " + value + " STATUS: SUCCESS");
+                System.out.println("SERVER " + id + " IS RESPONSABLE TO CREATE THIS ACCOUNT. EMAIL: " + key + " PASSWORD: " + value + " STATUS: SUCCESS");
                 response = CreateResponse.newBuilder().setResponse(true).build();
             } else {
-                System.out.println("SERVER " + responsability.getIdServer() + " IS RESPONSABLE TO CREATE THIS ACCOUNT. EMAIL: " + key + " PASSWORD: " + value + " STATUS: FAILED");
+                System.out.println("SERVER " + id + " IS RESPONSABLE TO CREATE THIS ACCOUNT. EMAIL: " + key + " PASSWORD: " + value + " STATUS: FAILED");
                 response = CreateResponse.newBuilder().setResponse(false).build();
             }
 
         } else {
-            System.out.println("SERVER " + responsability.getIdServer() + " IS NOT RESPONSABLE TO CREATE THIS ACCOUNT WITH EMAIL: " + key + " SENT TO NEXT SERVER");
+            connectToNextServer();
+            System.out.println("SERVER WITH ID" + id + " IS NOT RESPONSABLE TO CREATE THIS ACCOUNT WITH EMAIL: " + key + " SENT TO NEXT NODE FROM FINGER TABLE");
             CreateRequest createRequest = CreateRequest
                     .newBuilder()
                     .setKey(key)
@@ -104,7 +101,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
 
         } else {
 
-            System.out.println("SERVER " + responsability.getIdServer() + " IS NOT RESPONSABLE TO READ THIS ACCOUNT WITH EMAIL: " + key + " SENT TO NEXT SERVER");
+            System.out.println("SERVER WITH ID" + id + " IS NOT RESPONSABLE TO READ THIS ACCOUNT WITH EMAIL: " + key + " SENT TO NEXT NODE");
             ReadRequest readRequest = ReadRequest
                     .newBuilder()
                     .setKey(key)
@@ -137,12 +134,12 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
                 System.out.println("SERVER " + responsability.getIdServer() + " IS RESPONSABLE TO UPDATE THIS ACCOUNT VALUE. EMAIL: " + key + " PASSWORD: " + value + " STATUS: SUCCESS");
                 response = UpdateResponse.newBuilder().setResponse(true).build();
             } else {
-                System.out.println("SERVER " + responsability.getIdServer() + " IS RESPONSABLE TO UPDATE THIS ACCOUNT VALUE. EMAIL: " + key + " PASSWORD: " + value + " STATUS: FAILED");
+                System.out.println("SERVER WITH ID " + id + " IS RESPONSABLE TO UPDATE THIS ACCOUNT VALUE. EMAIL: " + key + " PASSWORD: " + value + " STATUS: FAILED");
                 response = UpdateResponse.newBuilder().setResponse(false).build();
             }
 
         } else {
-            System.out.println("SERVER " + responsability.getIdServer() + " IS NOT RESPONSABLE TO UPDATE THIS ACCOUNT WITH EMAIL: " + key + " SENT TO NEXT SERVER");
+            System.out.println("SERVER WITH ID " + id + " IS NOT RESPONSABLE TO UPDATE THIS ACCOUNT WITH EMAIL: " + key + " SENT TO NEXT NODE");
 
             UpdateRequest updateRequest = UpdateRequest
                     .newBuilder()
@@ -172,15 +169,15 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
             value = hashTableB.remove(key);
 
             if (value != null) {
-                System.out.println("SERVER " + responsability.getIdServer() + " IS RESPONSABLE TO DELETE THIS ACCOUNT VALUE. EMAIL: " + key + " PASSWORD: " + value + " STATUS: SUCCESS");
+                System.out.println("SERVER WITH ID " + id + " IS RESPONSABLE TO DELETE THIS ACCOUNT VALUE. EMAIL: " + key + " PASSWORD: " + value + " STATUS: SUCCESS");
                 response = DeleteResponse.newBuilder().setResponse(true).setMessage(value).build();
             } else {
-                System.out.println("SERVER " + responsability.getIdServer() + " IS RESPONSABLE TO DELETE THIS ACCOUNT VALUE. EMAIL: " + key + " PASSWORD: " + value + " STATUS: FAILED");
+                System.out.println("SERVER WITH ID " + id + " IS RESPONSABLE TO DELETE THIS ACCOUNT VALUE. EMAIL: " + key + " PASSWORD: " + value + " STATUS: FAILED");
                 response = DeleteResponse.newBuilder().setResponse(false).setMessage("").build();
             }
 
         } else {
-            System.out.println("SERVER " + responsability.getIdServer() + " IS NOT RESPONSABLE TO DELETE THIS ACCOUNT WITH EMAIL: " + key + " SENT TO NEXT SERVER");
+            System.out.println("SERVER WITH ID " + id + " IS NOT RESPONSABLE TO DELETE THIS ACCOUNT WITH EMAIL: " + key + " SENT TO NEXT NODE");
             DeleteRequest deleteRequest = DeleteRequest
                     .newBuilder()
                     .setKey(key)
@@ -214,49 +211,33 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
     private boolean isResponsable(String key) {
         int hashCode = Math.abs(key.hashCode()) % 128;
 
-        if (hashCode > id) {
-            TreeMap<Integer, String> temp = new TreeMap<>();
+        TreeMap<Integer, String> temp = new TreeMap<>();
 
-            for (int x = 0; x < LoginServer.ft.length; x++) {
-                temp.put((Integer) LoginServer.ft[x][0], String.valueOf(LoginServer.ft[x][1]));
-            }
-
-            int teste = temp.ceilingKey(hashCode);
+        for (int x = 0; x < LoginServer.ft.length; x++) {
+            temp.put((Integer) LoginServer.ft[x][0], String.valueOf(LoginServer.ft[x][1]));
+        }
+        if (!(((temp.floorKey(hashCode) != null && hashCode > temp.floorKey(hashCode)) && hashCode < id ) ||
+                (temp.floorKey(hashCode) == null && temp.floorKey(id) == null) && hashCode < id)) {
+            int indexResponsableNode;
 
             if (temp.ceilingKey(hashCode) != null) {
-                teste = temp.ceilingKey(hashCode);
+
+                if (temp.floorKey(hashCode) != null) {
+                    indexResponsableNode = temp.floorKey(hashCode);
+                } else {
+                    indexResponsableNode = temp.firstKey();
+                }
+
             } else {
-                teste = temp.firstKey();
+                indexResponsableNode = temp.lastKey();
             }
 
-            String teste1 = temp.ceilingEntry(teste).getValue();
-
-//        System.out.println(Arrays.stream(LoginServer.ft).count());
-//        int teste = (int) Arrays.stream(LoginServer.ft).flatMap(Arrays::stream)
-//                .collect(Collectors.toList()).stream()
-//                .filter(e -> (int)e > hashCode).findFirst().orElse(0);
-//
-//        int index = Arrays.stream(LoginServer.ft).flatMap(Arrays::stream)
-//                .collect(Collectors.toList()).indexOf(teste);
-//
-//        int i;
-            // String servidor = (String) LoginServer.ft[index][1];
-            nextServerAddress = teste1;
-
+            String respNodeAdress = temp.ceilingEntry(indexResponsableNode).getValue();
+            nextServerAddress = respNodeAdress;
             return false;
         } else {
             return true;
         }
-
-        //   AQUI VAI ACONTECER A MAGICA
-//        System.out.println("MIN: " + responsability.getMin() + " MAX: " + responsability.getMax());
-//        System.out.println("HASHCODE: " + hashCode);
-//
-//        if (hashCode >= responsability.getMin() && hashCode <= responsability.getMax()) {
-//            return true;
-//        }else {
-//            return false;
-//        }
 
     }
 

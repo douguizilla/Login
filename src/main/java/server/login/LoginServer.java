@@ -9,17 +9,13 @@ import java.util.stream.Collectors;
 public class LoginServer {
     HashTable hashTable;
     Server loginServer;
-    //ResponsabilityRange responsabilityRange;
     int currentServerPort;
-    String nextServerAddress; //"localhost@12345"
-    //Map<Integer,String> ft;
     static Object[][] ft;
     int id;
 
-    public LoginServer(int currentServerPort, String nextServerAddress, int id, List<LoginServer> serverList){
+    public LoginServer(int currentServerPort,int id, List<LoginServer> serverList){
         this.hashTable = new HashTable(id);
         this.currentServerPort = currentServerPort;
-        this.nextServerAddress = nextServerAddress;
 //        this.responsabilityRange = responsabilityRange;
         this.id = id;
         this.ft = ft;
@@ -32,10 +28,9 @@ public class LoginServer {
                 .build();
     }
 
-    public LoginServer(int currentServerPort, String nextServerAddress, int id){
+    public LoginServer(int currentServerPort, int id){
         this.hashTable = new HashTable(id);
         this.currentServerPort = currentServerPort;
-        this.nextServerAddress = nextServerAddress;
 //        this.responsabilityRange = responsabilityRange;
         this.id = id;
         this.ft = ft;

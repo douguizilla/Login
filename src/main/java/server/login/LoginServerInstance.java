@@ -5,11 +5,8 @@ import java.util.List;
 
 public class LoginServerInstance {
     //Responsabilidades de cada um dos três servidores que serao usados
-   // static int min1 = 0;
     static int max1 = 128 / 3;
-    //static int min2 = max1 + 1;
     static int max2 = max1 * 2;
-  //  static int min3 = max2 + 1;
     static int max3 = 128;
 
     static List<LoginServer> serverList = new ArrayList<>();
@@ -20,13 +17,13 @@ public class LoginServerInstance {
     //LoginServer(12347,"localhost@12345",new ResponsabilityRange(3,min3, max3));
 
     public static void main(String[] args) {
-        serverList.add(new LoginServer(12345,"localhost@12346", max1));
-        serverList.add(new LoginServer(12346,"localhost@12347",max2));
-        serverList.add(new LoginServer(12347,"localhost@12345",max3));
+        serverList.add(new LoginServer(12345, max1));
+        serverList.add(new LoginServer(12346,max2));
+        serverList.add(new LoginServer(12347,max3));
 
-       LoginServer l = new LoginServer(12345,"localhost@12346", max1, serverList);
-       // LoginServer l = new LoginServer(12346,"localhost@12347",max2,serverList);
-      //  LoginServer l = new LoginServer(12347,"localhost@12345",max3,serverList);
+       //LoginServer l = new LoginServer(12345,"localhost@12346", max1, serverList);
+        LoginServer l = new LoginServer(12346,max2,serverList);
+       // LoginServer l = new LoginServer(12347,"localhost@12345",max3,serverList);
 
         l.fingerTable(l,serverList);
         l.start();

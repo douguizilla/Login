@@ -212,21 +212,15 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
     private boolean isResponsable(String key) {
         int hashCode = Math.abs(key.hashCode()) % 128;
 
-//        TreeMap<Integer, String> temp = new TreeMap<>();
-//
-//        for (int x = 0; x < LoginServer.ft.length; x++) {
-//            temp.put((Integer) LoginServer.ft[x][0], String.valueOf(LoginServer.ft[x][1]));
-//        }
-
         Integer lastIndexSmallerNode = null;
         Integer lastIndexGreaterOrEqualNode = null;
-        FingerTableItem teste;
+        FingerTableItem nextServerItem;
         for (int x = 0; x < LoginServer.ft.length; x++) {
-            teste = LoginServer.fingerTable.get(x);
-            if (teste.idServer >= hashCode)
+            nextServerItem = LoginServer.fingerTable.get(x);
+            if (nextServerItem.idServer >= hashCode)
                 lastIndexGreaterOrEqualNode = x;
 
-            if (teste.idServer < hashCode)
+            if (nextServerItem.idServer < hashCode)
                 lastIndexSmallerNode = x;
         }
 
@@ -234,16 +228,14 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
         System.out.println(lastIndexSmallerNode);
 
         if (LoginServer.fingerTable.get(0).idServer >= hashCode)
-            teste = LoginServer.fingerTable.get(lastIndexGreaterOrEqualNode);
+            nextServerItem = LoginServer.fingerTable.get(lastIndexGreaterOrEqualNode);
         else
-            teste = LoginServer.fingerTable.get(lastIndexSmallerNode);
+            nextServerItem = LoginServer.fingerTable.get(lastIndexSmallerNode);
 
+        if (!((lastIndexSmallerNode != null && hashCode > LoginServer.fingerTable.get(lastIndexSmallerNode).idServer && hashCode < id)
+                || lastIndexSmallerNode == null && hashCode < id)) {
 
-
-        if (!((lastIndexSmallerNode != null && hashCode > LoginServer.fingerTable.get(lastIndexSmallerNode).idServer && hashCode <id)
-                || lastIndexSmallerNode == null && hashCode < id )) {
-
-            nextServerAddress = teste.serverAdress;
+            nextServerAddress = nextServerItem.serverAdress;
             return false;
         } else {
             return true;

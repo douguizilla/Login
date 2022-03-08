@@ -11,6 +11,7 @@ public class LoginServer {
     Server loginServer;
     int currentServerPort;
     static Object[][] ft;
+    static List<FingerTableItem> fingerTable;
     int id;
 
     public LoginServer(int currentServerPort,int id, List<LoginServer> serverList){
@@ -19,6 +20,7 @@ public class LoginServer {
 //        this.responsabilityRange = responsabilityRange;
         this.id = id;
         this.ft = ft;
+        this.fingerTable = fingerTable;
 
 
 
@@ -53,21 +55,12 @@ public class LoginServer {
         }
     }
 
-//    public void fingerTable1(int currentServerId, List<LoginServer> serverList){
-//        serverList.stream().
-//                filter(eachServer -> eachServer.id != currentServerId)
-//                .forEach(eachServer -> {
-//                    ft.put(eachServer.id,"localhost@" + eachServer.currentServerPort);
-//                });
-//    }
 
     public void fingerTable(LoginServer server, List<LoginServer> allServers) {
-            server.ft = new Object[7][2];
-         int id, predecessor, sucessor;
-         id = server.id;
+    server.ft = new Object[7][2];
+    server.fingerTable = new ArrayList<FingerTableItem>();
 
-        // server.ft = new Object[7][2]; //M linhas e 2 colunas (ID, Endereço)
-        //5 linhas de acordo com a conversão binaria: 16,8,4,2,1
+         id = server.id;
 
         // Teremos 7 linhas pois o máximo de valor que aceitaremos é 128
         TreeMap<Integer, String> temp = new TreeMap<>();
@@ -97,11 +90,14 @@ public class LoginServer {
 
             if (temp.ceilingKey(ftpi) != null) {
                 server.ft[i][0] = temp.ceilingKey(ftpi);
+                server.fingerTable.add(new FingerTableItem(temp.ceilingKey(ftpi),temp.ceilingEntry(ftpi).getValue()));
             } else {
                 server.ft[i][0] = temp.firstKey();
+                server.fingerTable.add(new FingerTableItem(temp.firstKey(),temp.firstEntry().getValue()));
             }
 
             server.ft[i][1] = temp.get((int) server.ft[i][0]);
+
         }
 
         // Impressão para conferência
@@ -109,6 +105,12 @@ public class LoginServer {
         for (int i = 0; i < 7; i++) {
             System.out.println("| " + (i + 1) + " | " + (int) server.ft[i][0] + " |");
         }
+
+
+        for (int i = 0; i < 7; i++) {
+            System.out.println("| " + (i + 1) + " | " + server.fingerTable.get(i).idServer + " |");
+        }
+
 
     }
 

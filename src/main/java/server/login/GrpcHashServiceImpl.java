@@ -8,12 +8,13 @@ import io.grpc.stub.StreamObserver;
 import server.HashTable;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImplBase {
     private HashTable hashTableB;
     private String nextServerAddress;
     private GrpcHashServiceGrpc.GrpcHashServiceBlockingStub nextServerStub;
-    private ResponsabilityRange responsability;
     private int id;
     private boolean isConnected = false;
     //private Object[][] ft;
@@ -62,7 +63,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
 
         } else {
             connectToNextServer();
-            System.out.println("SERVER WITH ID" + id + " IS NOT RESPONSABLE TO CREATE THIS ACCOUNT WITH EMAIL: " + key + " SENT TO NEXT NODE FROM FINGER TABLE");
+            System.out.println("SERVER WITH ID " + id + " IS NOT RESPONSABLE TO CREATE THIS ACCOUNT WITH EMAIL: " + key + " SENT TO NEXT NODE FROM FINGER TABLE");
             CreateRequest createRequest = CreateRequest
                     .newBuilder()
                     .setKey(key)
@@ -92,10 +93,10 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
             String value = hashTableB.read(key);
 
             if (value != null) {
-                System.out.println("SERVER " + responsability.getIdServer() + " IS RESPONSABLE TO READ THIS ACCOUNT VALUE. EMAIL: " + key + " PASSWORD: " + value + " STATUS: SUCCESS");
+                System.out.println("SERVER " + id + " IS RESPONSABLE TO READ THIS ACCOUNT VALUE. EMAIL: " + key + " PASSWORD: " + value + " STATUS: SUCCESS");
                 response = ReadResponse.newBuilder().setKey(key).setValue(value).build();
             } else {
-                System.out.println("SERVER " + responsability.getIdServer() + " IS RESPONSABLE TO READ THIS ACCOUNT VALUE. EMAIL: " + key + " STATUS: FAILED");
+                System.out.println("SERVER " + id + " IS RESPONSABLE TO READ THIS ACCOUNT VALUE. EMAIL: " + key + " STATUS: FAILED");
                 response = ReadResponse.newBuilder().setKey(key).setValue("").build();
             }
 
@@ -131,7 +132,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
             int result = hashTableB.update(key, value);
 
             if (result == 1) {
-                System.out.println("SERVER " + responsability.getIdServer() + " IS RESPONSABLE TO UPDATE THIS ACCOUNT VALUE. EMAIL: " + key + " PASSWORD: " + value + " STATUS: SUCCESS");
+                System.out.println("SERVER " + id + " IS RESPONSABLE TO UPDATE THIS ACCOUNT VALUE. EMAIL: " + key + " PASSWORD: " + value + " STATUS: SUCCESS");
                 response = UpdateResponse.newBuilder().setResponse(true).build();
             } else {
                 System.out.println("SERVER WITH ID " + id + " IS RESPONSABLE TO UPDATE THIS ACCOUNT VALUE. EMAIL: " + key + " PASSWORD: " + value + " STATUS: FAILED");
@@ -211,35 +212,46 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
     private boolean isResponsable(String key) {
         int hashCode = Math.abs(key.hashCode()) % 128;
 
-        TreeMap<Integer, String> temp = new TreeMap<>();
+//        TreeMap<Integer, String> temp = new TreeMap<>();
+//
+//        for (int x = 0; x < LoginServer.ft.length; x++) {
+//            temp.put((Integer) LoginServer.ft[x][0], String.valueOf(LoginServer.ft[x][1]));
+//        }
 
+        Integer lastIndexSmallerNode = null;
+        Integer lastIndexGreaterOrEqualNode = null;
+        FingerTableItem teste;
         for (int x = 0; x < LoginServer.ft.length; x++) {
-            temp.put((Integer) LoginServer.ft[x][0], String.valueOf(LoginServer.ft[x][1]));
+            teste = LoginServer.fingerTable.get(x);
+            if (teste.idServer >= hashCode)
+                lastIndexGreaterOrEqualNode = x;
+
+            if (teste.idServer < hashCode)
+                lastIndexSmallerNode = x;
         }
-        if (!(((temp.floorKey(hashCode) != null && hashCode > temp.floorKey(hashCode)) && hashCode < id ) ||
-                (temp.floorKey(hashCode) == null && temp.floorKey(id) == null) && hashCode < id)) {
-            int indexResponsableNode;
 
-            if (temp.ceilingKey(hashCode) != null) {
+        System.out.println(lastIndexGreaterOrEqualNode);
+        System.out.println(lastIndexSmallerNode);
 
-                if (temp.floorKey(hashCode) != null) {
-                    indexResponsableNode = temp.floorKey(hashCode);
-                } else {
-                    indexResponsableNode = temp.firstKey();
-                }
+        if (LoginServer.fingerTable.get(0).idServer >= hashCode)
+            teste = LoginServer.fingerTable.get(lastIndexGreaterOrEqualNode);
+        else
+            teste = LoginServer.fingerTable.get(lastIndexSmallerNode);
 
-            } else {
-                indexResponsableNode = temp.lastKey();
-            }
 
-            String respNodeAdress = temp.ceilingEntry(indexResponsableNode).getValue();
-            nextServerAddress = respNodeAdress;
+
+        if (!((lastIndexSmallerNode != null && hashCode > LoginServer.fingerTable.get(lastIndexSmallerNode).idServer && hashCode <id)
+                || lastIndexSmallerNode == null && hashCode < id )) {
+
+            nextServerAddress = teste.serverAdress;
             return false;
         } else {
             return true;
         }
 
     }
-
-
 }
+
+
+
+

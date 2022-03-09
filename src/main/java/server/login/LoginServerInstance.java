@@ -15,9 +15,9 @@ public class LoginServerInstance {
     //LoginServer(12347,"localhost@12345",new ResponsabilityRange(3,min3, max3));
 
     public static void main(String[] args) {
-        LoginServer l = new LoginServer(12345,"localhost@12346",new ResponsabilityRange(1,min1, max1));
+//        LoginServer l = new LoginServer(12345,"localhost@12346",new ResponsabilityRange(1,min1, max1));
 //        LoginServer l = new LoginServer(12346,"localhost@12347",new ResponsabilityRange(2,min2, max2));
-//        LoginServer l = new LoginServer(12347,"localhost@12345",new ResponsabilityRange(3,min3, max3));
+        LoginServer l = new LoginServer(12347,"localhost@12345",new ResponsabilityRange(3,min3, max3));
 
         l.start();
 

@@ -7,9 +7,9 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import server.HashTable;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImplBase {
     private HashTable hashTableB;
@@ -17,7 +17,6 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
     private GrpcHashServiceGrpc.GrpcHashServiceBlockingStub nextServerStub;
     private int id;
     private boolean isConnected = false;
-    //private Object[][] ft;
     private List<LoginServer> serverList;
 
     GrpcHashServiceImpl(HashTable hashTable, int id, List<LoginServer> serverList) {

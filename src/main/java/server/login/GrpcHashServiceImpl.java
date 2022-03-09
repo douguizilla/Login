@@ -43,7 +43,6 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
 
     @Override
     public void create(CreateRequest request, StreamObserver<CreateResponse> responseObserver) {
-        // connectToNextServer();
 
         String key = request.getKey();
         String value = request.getValue();
@@ -84,8 +83,6 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
 
     @Override
     public void read(ReadRequest request, StreamObserver<ReadResponse> responseObserver) {
-        connectToNextServer();
-
         String key = request.getKey();
         ReadResponse response;
 
@@ -101,7 +98,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
             }
 
         } else {
-
+            connectToNextServer();
             System.out.println("SERVER WITH ID" + id + " IS NOT RESPONSABLE TO READ THIS ACCOUNT WITH EMAIL: " + key + " SENT TO NEXT NODE");
             ReadRequest readRequest = ReadRequest
                     .newBuilder()
@@ -121,7 +118,6 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
 
     @Override
     public void update(UpdateRequest request, StreamObserver<UpdateResponse> responseObserver) {
-        connectToNextServer();
 
         String key = request.getKey();
         String value = request.getValue();
@@ -140,6 +136,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
             }
 
         } else {
+            connectToNextServer();
             System.out.println("SERVER WITH ID " + id + " IS NOT RESPONSABLE TO UPDATE THIS ACCOUNT WITH EMAIL: " + key + " SENT TO NEXT NODE");
 
             UpdateRequest updateRequest = UpdateRequest
@@ -160,7 +157,6 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
 
     @Override
     public void delete(DeleteRequest request, StreamObserver<DeleteResponse> responseObserver) {
-        connectToNextServer();
 
         String key = request.getKey();
         String value;
@@ -178,6 +174,7 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
             }
 
         } else {
+            connectToNextServer();
             System.out.println("SERVER WITH ID " + id + " IS NOT RESPONSABLE TO DELETE THIS ACCOUNT WITH EMAIL: " + key + " SENT TO NEXT NODE");
             DeleteRequest deleteRequest = DeleteRequest
                     .newBuilder()
@@ -211,33 +208,45 @@ public class GrpcHashServiceImpl extends GrpcHashServiceGrpc.GrpcHashServiceImpl
 
     private boolean isResponsable(String key) {
         int hashCode = Math.abs(key.hashCode()) % 128;
-
+        Integer max = null;
+        Integer min = null;
         Integer lastIndexSmallerNode = null;
         Integer lastIndexGreaterOrEqualNode = null;
-        FingerTableItem nextServerItem;
-        for (int x = 0; x < LoginServer.ft.length; x++) {
+        FingerTableItem nextServerItem = null;
+
+        min = Collections.min(LoginServer.fingerTable, Comparator.comparing(s -> s.getIdServer())).idServer;
+        max = Collections.max(LoginServer.fingerTable, Comparator.comparing(s -> s.getIdServer())).idServer;
+
+        for (int x = 0; x < LoginServer.fingerTable.stream().count(); x++) {
             nextServerItem = LoginServer.fingerTable.get(x);
-            if (nextServerItem.idServer >= hashCode)
+
+            if (min > hashCode && nextServerItem.idServer == min) {
+                lastIndexGreaterOrEqualNode = x;
+            } else if (min < hashCode && nextServerItem.idServer > hashCode)
                 lastIndexGreaterOrEqualNode = x;
 
-            if (nextServerItem.idServer < hashCode)
+
+            if (min < hashCode &&  nextServerItem.idServer == min)
                 lastIndexSmallerNode = x;
         }
 
-        System.out.println(lastIndexGreaterOrEqualNode);
-        System.out.println(lastIndexSmallerNode);
-
-        if (LoginServer.fingerTable.get(0).idServer >= hashCode)
+        if (lastIndexGreaterOrEqualNode != null
+                && (LoginServer.fingerTable.get(0).idServer >= hashCode &&
+                LoginServer.fingerTable.get(0).idServer == LoginServer.fingerTable.get(lastIndexGreaterOrEqualNode).idServer)) {
             nextServerItem = LoginServer.fingerTable.get(lastIndexGreaterOrEqualNode);
-        else
+        } else if (lastIndexSmallerNode != null)
             nextServerItem = LoginServer.fingerTable.get(lastIndexSmallerNode);
 
         if (!((lastIndexSmallerNode != null && hashCode > LoginServer.fingerTable.get(lastIndexSmallerNode).idServer && hashCode < id)
                 || lastIndexSmallerNode == null && hashCode < id)) {
 
             nextServerAddress = nextServerItem.serverAdress;
+
+            System.out.println("| HASHCODE NUMBER: " + hashCode + " REDIRECTING TO SERVER ID: " + nextServerItem.idServer + " BECAUSE SERVER " + id + "IS NOT RESPONSABLE");
+
             return false;
         } else {
+            System.out.println("| HASHCODE NUMBER: " + hashCode + " BELONGS TO SERVER ID: " + id);
             return true;
         }
 
